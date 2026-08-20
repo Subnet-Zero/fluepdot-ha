@@ -1,0 +1,491 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Flipdot verbinden",
+        "description": "Adresse der fluepboard im Netz. Die Anzeige antwortet ohne Anmeldung.",
+        "data": {
+          "host": "Host oder IP-Adresse"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Die Anzeige antwortet nicht. Adresse und Netzwerk pruefen."
+    },
+    "abort": {
+      "already_configured": "Diese Anzeige ist bereits eingerichtet."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Einstellungen",
+        "data": {
+          "scan_interval": "Abrufintervall",
+          "rotation_interval": "Rotationsdauer"
+        },
+        "data_description": {
+          "scan_interval": "Wie oft der Framebuffer gelesen wird - fuer Vorschau und Fremdinhalts-Erkennung.",
+          "rotation_interval": "Standarddauer je Rotationsseite, wenn die Seite selbst keine angibt."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "content": {
+        "name": "Inhalt"
+      },
+      "pixels_on": {
+        "name": "Punkte an"
+      },
+      "page": {
+        "name": "Seite"
+      }
+    },
+    "binary_sensor": {
+      "online": {
+        "name": "Erreichbar"
+      },
+      "foreign_content": {
+        "name": "Fremdinhalt"
+      },
+      "quiet_active": {
+        "name": "Ruhezeit"
+      }
+    },
+    "switch": {
+      "display": {
+        "name": "Anzeige"
+      },
+      "quiet": {
+        "name": "Nachtruhe"
+      },
+      "differential": {
+        "name": "Differenzielles Zeichnen"
+      }
+    },
+    "select": {
+      "mode": {
+        "name": "Betriebsart",
+        "state": {
+          "rotation": "Rotation",
+          "date": "Nur Datum",
+          "manual": "Manuell",
+          "off": "Aus"
+        }
+      },
+      "font": {
+        "name": "Schriftart"
+      },
+      "align": {
+        "name": "Ausrichtung",
+        "state": {
+          "left": "Links",
+          "center": "Zentriert",
+          "right": "Rechts"
+        }
+      }
+    },
+    "number": {
+      "rotation_interval": {
+        "name": "Rotationsdauer"
+      },
+      "set_delay": {
+        "name": "Setzverzoegerung"
+      }
+    },
+    "time": {
+      "quiet_start": {
+        "name": "Ruhezeit Beginn"
+      },
+      "quiet_end": {
+        "name": "Ruhezeit Ende"
+      }
+    },
+    "text": {
+      "message": {
+        "name": "Nachricht"
+      }
+    },
+    "button": {
+      "clear": {
+        "name": "Leeren"
+      },
+      "date": {
+        "name": "Datum"
+      },
+      "test_pattern": {
+        "name": "Testbild"
+      },
+      "invert": {
+        "name": "Invertieren"
+      },
+      "exercise": {
+        "name": "Punkte-Training"
+      }
+    },
+    "image": {
+      "preview": {
+        "name": "Vorschau"
+      }
+    },
+    "notify": {
+      "notify": {
+        "name": "Mitteilung"
+      }
+    }
+  },
+  "services": {
+    "send_text": {
+      "name": "Text anzeigen",
+      "description": "Schreibt einen Text auf die Anzeige. Im Modus device rendert die Anzeige selbst (wie bisher), im Modus compose baut Home Assistant das Bild und kann zentrieren und umbrechen.",
+      "fields": {
+        "device_id": {
+          "name": "Anzeige",
+          "description": "Welche Flipdot-Anzeige gemeint ist. Ohne Angabe gelten alle."
+        },
+        "text": {
+          "name": "Text",
+          "description": "Der anzuzeigende Text."
+        },
+        "font": {
+          "name": "Schriftart",
+          "description": "Kurzname der Schrift, z. B. DejaVuSans12bw_bwfont oder builtin5x7."
+        },
+        "mode": {
+          "name": "Renderweg",
+          "description": "device = die Anzeige rendert selbst, compose = Home Assistant baut das Bild."
+        },
+        "align": {
+          "name": "Ausrichtung",
+          "description": "Waagerechte Ausrichtung (nur compose)."
+        },
+        "valign": {
+          "name": "Senkrechte Ausrichtung",
+          "description": "Senkrechte Ausrichtung (nur compose)."
+        },
+        "icon": {
+          "name": "Symbol",
+          "description": "Symbol links neben dem Text."
+        },
+        "x": {
+          "name": "x",
+          "description": "Waagerechte Position in Punkten."
+        },
+        "y": {
+          "name": "y",
+          "description": "Senkrechte Position in Punkten."
+        },
+        "clear": {
+          "name": "Vorher leeren",
+          "description": "Anzeige vor dem Schreiben leeren. Ohne das bleibt der alte Inhalt teilweise stehen."
+        },
+        "duration": {
+          "name": "Dauer",
+          "description": "Wie lange die Nachricht stehen bleibt. Danach kehrt die Anzeige zum Normalbetrieb zurueck."
+        },
+        "priority": {
+          "name": "Prioritaet",
+          "description": "Hoehere Prioritaet verdraengt eine laufende Nachricht."
+        }
+      }
+    },
+    "send_lines": {
+      "name": "Mehrere Zeilen anzeigen",
+      "description": "Zeigt bis zu drei Zeilen, automatisch ausgerichtet.",
+      "fields": {
+        "device_id": {
+          "name": "Anzeige",
+          "description": "Welche Flipdot-Anzeige gemeint ist. Ohne Angabe gelten alle."
+        },
+        "lines": {
+          "name": "Zeilen",
+          "description": "Liste der Zeilen."
+        },
+        "font": {
+          "name": "Schriftart",
+          "description": "Kurzname der Schrift, z. B. DejaVuSans12bw_bwfont oder builtin5x7."
+        },
+        "align": {
+          "name": "Ausrichtung",
+          "description": "Waagerechte Ausrichtung (nur compose)."
+        },
+        "valign": {
+          "name": "Senkrechte Ausrichtung",
+          "description": "Senkrechte Ausrichtung (nur compose)."
+        },
+        "icon": {
+          "name": "Symbol",
+          "description": "Symbol links neben dem Text."
+        },
+        "duration": {
+          "name": "Dauer",
+          "description": "Wie lange die Nachricht stehen bleibt. Danach kehrt die Anzeige zum Normalbetrieb zurueck."
+        },
+        "priority": {
+          "name": "Prioritaet",
+          "description": "Hoehere Prioritaet verdraengt eine laufende Nachricht."
+        }
+      }
+    },
+    "marquee": {
+      "name": "Lauftext",
+      "description": "Laesst einen Text durchlaufen. Achtung: klappert deutlich hoerbar.",
+      "fields": {
+        "device_id": {
+          "name": "Anzeige",
+          "description": "Welche Flipdot-Anzeige gemeint ist. Ohne Angabe gelten alle."
+        },
+        "text": {
+          "name": "Text",
+          "description": "Der Lauftext."
+        },
+        "font": {
+          "name": "Schriftart",
+          "description": "Kurzname der Schrift, z. B. DejaVuSans12bw_bwfont oder builtin5x7."
+        },
+        "step": {
+          "name": "Schrittweite",
+          "description": "Punkte je Schritt."
+        },
+        "delay": {
+          "name": "Pause",
+          "description": "Pause zwischen den Schritten."
+        },
+        "repeat": {
+          "name": "Durchlaeufe",
+          "description": "Wie oft der Text laeuft."
+        },
+        "y": {
+          "name": "y",
+          "description": "Senkrechte Position."
+        },
+        "priority": {
+          "name": "Prioritaet",
+          "description": "Hoehere Prioritaet verdraengt eine laufende Nachricht."
+        }
+      }
+    },
+    "draw": {
+      "name": "Rohbild zeichnen",
+      "description": "Schreibt einen kompletten Framebuffer: 16 Zeilen, X = Punkt an, Leerzeichen = Punkt aus.",
+      "fields": {
+        "device_id": {
+          "name": "Anzeige",
+          "description": "Welche Flipdot-Anzeige gemeint ist. Ohne Angabe gelten alle."
+        },
+        "framebuffer": {
+          "name": "Framebuffer",
+          "description": "Das Bild als Text."
+        },
+        "duration": {
+          "name": "Dauer",
+          "description": "Wie lange die Nachricht stehen bleibt. Danach kehrt die Anzeige zum Normalbetrieb zurueck."
+        },
+        "priority": {
+          "name": "Prioritaet",
+          "description": "Hoehere Prioritaet verdraengt eine laufende Nachricht."
+        }
+      }
+    },
+    "draw_bar": {
+      "name": "Balken anzeigen",
+      "description": "Zeigt einen Fortschrittsbalken, wahlweise mit Beschriftung.",
+      "fields": {
+        "device_id": {
+          "name": "Anzeige",
+          "description": "Welche Flipdot-Anzeige gemeint ist. Ohne Angabe gelten alle."
+        },
+        "value": {
+          "name": "Wert",
+          "description": "Aktueller Wert."
+        },
+        "min": {
+          "name": "Minimum",
+          "description": "Unteres Ende der Skala."
+        },
+        "max": {
+          "name": "Maximum",
+          "description": "Oberes Ende der Skala."
+        },
+        "label": {
+          "name": "Beschriftung",
+          "description": "Text ueber dem Balken."
+        },
+        "font": {
+          "name": "Schriftart",
+          "description": "Kurzname der Schrift, z. B. DejaVuSans12bw_bwfont oder builtin5x7."
+        },
+        "x": {
+          "name": "x",
+          "description": "Linker Rand."
+        },
+        "y": {
+          "name": "y",
+          "description": "Obere Kante."
+        },
+        "width": {
+          "name": "Breite",
+          "description": "Breite in Punkten."
+        },
+        "height": {
+          "name": "Hoehe",
+          "description": "Hoehe in Punkten."
+        },
+        "duration": {
+          "name": "Dauer",
+          "description": "Wie lange die Nachricht stehen bleibt. Danach kehrt die Anzeige zum Normalbetrieb zurueck."
+        },
+        "priority": {
+          "name": "Prioritaet",
+          "description": "Hoehere Prioritaet verdraengt eine laufende Nachricht."
+        }
+      }
+    },
+    "set_pixel": {
+      "name": "Punkt setzen",
+      "description": "Setzt einen einzelnen Punkt hell.",
+      "fields": {
+        "device_id": {
+          "name": "Anzeige",
+          "description": "Welche Flipdot-Anzeige gemeint ist. Ohne Angabe gelten alle."
+        },
+        "x": {
+          "name": "x",
+          "description": "Spalte."
+        },
+        "y": {
+          "name": "y",
+          "description": "Zeile."
+        }
+      }
+    },
+    "clear_pixel": {
+      "name": "Punkt loeschen",
+      "description": "Setzt einen einzelnen Punkt dunkel.",
+      "fields": {
+        "device_id": {
+          "name": "Anzeige",
+          "description": "Welche Flipdot-Anzeige gemeint ist. Ohne Angabe gelten alle."
+        },
+        "x": {
+          "name": "x",
+          "description": "Spalte."
+        },
+        "y": {
+          "name": "y",
+          "description": "Zeile."
+        }
+      }
+    },
+    "clear": {
+      "name": "Anzeige leeren",
+      "description": "Setzt alle Punkte dunkel.",
+      "fields": {
+        "device_id": {
+          "name": "Anzeige",
+          "description": "Welche Flipdot-Anzeige gemeint ist. Ohne Angabe gelten alle."
+        }
+      }
+    },
+    "effect": {
+      "name": "Effekt abspielen",
+      "description": "Spielt eine kurze Animation ab.",
+      "fields": {
+        "device_id": {
+          "name": "Anzeige",
+          "description": "Welche Flipdot-Anzeige gemeint ist. Ohne Angabe gelten alle."
+        },
+        "effect": {
+          "name": "Effekt",
+          "description": "Welcher Effekt."
+        },
+        "frames": {
+          "name": "Bilder",
+          "description": "Anzahl der Einzelbilder."
+        },
+        "delay": {
+          "name": "Pause",
+          "description": "Pause zwischen den Bildern."
+        },
+        "priority": {
+          "name": "Prioritaet",
+          "description": "Hoehere Prioritaet verdraengt eine laufende Nachricht."
+        }
+      }
+    },
+    "show_page": {
+      "name": "Seite anzeigen",
+      "description": "Zeigt eine in fluepdot_pages.yaml definierte Seite sofort.",
+      "fields": {
+        "device_id": {
+          "name": "Anzeige",
+          "description": "Welche Flipdot-Anzeige gemeint ist. Ohne Angabe gelten alle."
+        },
+        "page_id": {
+          "name": "Seite",
+          "description": "Die id der Seite."
+        },
+        "duration": {
+          "name": "Dauer",
+          "description": "Wie lange die Nachricht stehen bleibt. Danach kehrt die Anzeige zum Normalbetrieb zurueck."
+        },
+        "priority": {
+          "name": "Prioritaet",
+          "description": "Hoehere Prioritaet verdraengt eine laufende Nachricht."
+        }
+      }
+    },
+    "reload_pages": {
+      "name": "Seiten neu laden",
+      "description": "Liest fluepdot_pages.yaml neu ein - ohne Neustart.",
+      "fields": {
+        "device_id": {
+          "name": "Anzeige",
+          "description": "Welche Flipdot-Anzeige gemeint ist. Ohne Angabe gelten alle."
+        }
+      }
+    },
+    "extract_fonts": {
+      "name": "Schriften vermessen",
+      "description": "Laesst die Anzeige jedes Zeichen einmal zeichnen und misst die Glyphen aus. Danach kann Home Assistant dieselben Schriften selbst setzen. Dauert einige Minuten und klappert hoerbar.",
+      "fields": {
+        "device_id": {
+          "name": "Anzeige",
+          "description": "Welche Flipdot-Anzeige gemeint ist. Ohne Angabe gelten alle."
+        },
+        "fonts": {
+          "name": "Schriften",
+          "description": "Welche Schriften vermessen werden sollen."
+        },
+        "charset": {
+          "name": "Zeichensatz",
+          "description": "Welche Zeichen gemessen werden."
+        }
+      }
+    },
+    "set_rendering_timings": {
+      "name": "Timings setzen",
+      "description": "Setzt die Ansteuerzeiten je Spalte. Zu kurze Zeiten lassen Punkte haengen.",
+      "fields": {
+        "device_id": {
+          "name": "Anzeige",
+          "description": "Welche Flipdot-Anzeige gemeint ist. Ohne Angabe gelten alle."
+        },
+        "pre": {
+          "name": "Vorlauf",
+          "description": "Vorlaufzeit."
+        },
+        "clear": {
+          "name": "Loeschzeit",
+          "description": "Zeit zum Dunkelschalten."
+        },
+        "set": {
+          "name": "Setzzeit",
+          "description": "Zeit zum Hellschalten."
+        }
+      }
+    }
+  }
+}

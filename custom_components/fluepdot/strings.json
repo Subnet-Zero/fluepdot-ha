@@ -1,0 +1,491 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect Flipdot",
+        "description": "Address of the fluepboard on the network. The display needs no authentication.",
+        "data": {
+          "host": "Host or IP address"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "The display does not respond. Check address and network."
+    },
+    "abort": {
+      "already_configured": "This display is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Settings",
+        "data": {
+          "scan_interval": "Polling interval",
+          "rotation_interval": "Rotation interval"
+        },
+        "data_description": {
+          "scan_interval": "How often the framebuffer is read, for the preview and foreign content detection.",
+          "rotation_interval": "Default duration per rotation page unless the page defines its own."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "content": {
+        "name": "Content"
+      },
+      "pixels_on": {
+        "name": "Pixels on"
+      },
+      "page": {
+        "name": "Page"
+      }
+    },
+    "binary_sensor": {
+      "online": {
+        "name": "Online"
+      },
+      "foreign_content": {
+        "name": "Foreign content"
+      },
+      "quiet_active": {
+        "name": "Quiet hours"
+      }
+    },
+    "switch": {
+      "display": {
+        "name": "Display"
+      },
+      "quiet": {
+        "name": "Quiet hours"
+      },
+      "differential": {
+        "name": "Differential rendering"
+      }
+    },
+    "select": {
+      "mode": {
+        "name": "Mode",
+        "state": {
+          "rotation": "Rotation",
+          "date": "Date only",
+          "manual": "Manual",
+          "off": "Off"
+        }
+      },
+      "font": {
+        "name": "Font"
+      },
+      "align": {
+        "name": "Alignment",
+        "state": {
+          "left": "Left",
+          "center": "Center",
+          "right": "Right"
+        }
+      }
+    },
+    "number": {
+      "rotation_interval": {
+        "name": "Rotation interval"
+      },
+      "set_delay": {
+        "name": "Set delay"
+      }
+    },
+    "time": {
+      "quiet_start": {
+        "name": "Quiet hours start"
+      },
+      "quiet_end": {
+        "name": "Quiet hours end"
+      }
+    },
+    "text": {
+      "message": {
+        "name": "Message"
+      }
+    },
+    "button": {
+      "clear": {
+        "name": "Clear"
+      },
+      "date": {
+        "name": "Date"
+      },
+      "test_pattern": {
+        "name": "Test pattern"
+      },
+      "invert": {
+        "name": "Invert"
+      },
+      "exercise": {
+        "name": "Exercise pixels"
+      }
+    },
+    "image": {
+      "preview": {
+        "name": "Preview"
+      }
+    },
+    "notify": {
+      "notify": {
+        "name": "Notification"
+      }
+    }
+  },
+  "services": {
+    "send_text": {
+      "name": "Show text",
+      "description": "Writes text to the display. In device mode the board renders itself, in compose mode Home Assistant builds the image and can centre and wrap.",
+      "fields": {
+        "device_id": {
+          "name": "Display",
+          "description": "Which Flipdot display to target. Applies to all if omitted."
+        },
+        "text": {
+          "name": "Text",
+          "description": "The text to show."
+        },
+        "font": {
+          "name": "Font",
+          "description": "Short font name, e.g. DejaVuSans12bw_bwfont or builtin5x7."
+        },
+        "mode": {
+          "name": "Render mode",
+          "description": "device = the board renders, compose = Home Assistant builds the image."
+        },
+        "align": {
+          "name": "Alignment",
+          "description": "Horizontal alignment (compose only)."
+        },
+        "valign": {
+          "name": "Vertical alignment",
+          "description": "Vertical alignment (compose only)."
+        },
+        "icon": {
+          "name": "Icon",
+          "description": "Icon drawn left of the text."
+        },
+        "x": {
+          "name": "x",
+          "description": "Horizontal position in pixels."
+        },
+        "y": {
+          "name": "y",
+          "description": "Vertical position in pixels."
+        },
+        "clear": {
+          "name": "Clear first",
+          "description": "Clear the display first. Otherwise remnants of the previous content stay visible."
+        },
+        "duration": {
+          "name": "Duration",
+          "description": "How long the message stays before the display returns to normal operation."
+        },
+        "priority": {
+          "name": "Priority",
+          "description": "Higher priority replaces a running message."
+        }
+      }
+    },
+    "send_lines": {
+      "name": "Show lines",
+      "description": "Shows up to three lines, aligned automatically.",
+      "fields": {
+        "device_id": {
+          "name": "Display",
+          "description": "Which Flipdot display to target. Applies to all if omitted."
+        },
+        "lines": {
+          "name": "Lines",
+          "description": "List of lines."
+        },
+        "font": {
+          "name": "Font",
+          "description": "Short font name, e.g. DejaVuSans12bw_bwfont or builtin5x7."
+        },
+        "align": {
+          "name": "Alignment",
+          "description": "Horizontal alignment (compose only)."
+        },
+        "valign": {
+          "name": "Vertical alignment",
+          "description": "Vertical alignment (compose only)."
+        },
+        "icon": {
+          "name": "Icon",
+          "description": "Icon drawn left of the text."
+        },
+        "duration": {
+          "name": "Duration",
+          "description": "How long the message stays before the display returns to normal operation."
+        },
+        "priority": {
+          "name": "Priority",
+          "description": "Higher priority replaces a running message."
+        }
+      }
+    },
+    "marquee": {
+      "name": "Marquee",
+      "description": "Scrolls text across the display. Note: audibly noisy.",
+      "fields": {
+        "device_id": {
+          "name": "Display",
+          "description": "Which Flipdot display to target. Applies to all if omitted."
+        },
+        "text": {
+          "name": "Text",
+          "description": "The scrolling text."
+        },
+        "font": {
+          "name": "Font",
+          "description": "Short font name, e.g. DejaVuSans12bw_bwfont or builtin5x7."
+        },
+        "step": {
+          "name": "Step",
+          "description": "Pixels per step."
+        },
+        "delay": {
+          "name": "Delay",
+          "description": "Delay between steps."
+        },
+        "repeat": {
+          "name": "Repeats",
+          "description": "How often the text runs."
+        },
+        "y": {
+          "name": "y",
+          "description": "Vertical position."
+        },
+        "priority": {
+          "name": "Priority",
+          "description": "Higher priority replaces a running message."
+        }
+      }
+    },
+    "draw": {
+      "name": "Draw raw image",
+      "description": "Writes a complete framebuffer: 16 lines, X = dot on, space = dot off.",
+      "fields": {
+        "device_id": {
+          "name": "Display",
+          "description": "Which Flipdot display to target. Applies to all if omitted."
+        },
+        "framebuffer": {
+          "name": "Framebuffer",
+          "description": "The image as text."
+        },
+        "duration": {
+          "name": "Duration",
+          "description": "How long the message stays before the display returns to normal operation."
+        },
+        "priority": {
+          "name": "Priority",
+          "description": "Higher priority replaces a running message."
+        }
+      }
+    },
+    "draw_bar": {
+      "name": "Draw bar",
+      "description": "Shows a progress bar, optionally labelled.",
+      "fields": {
+        "device_id": {
+          "name": "Display",
+          "description": "Which Flipdot display to target. Applies to all if omitted."
+        },
+        "value": {
+          "name": "Value",
+          "description": "Current value."
+        },
+        "min": {
+          "name": "Minimum",
+          "description": "Lower end of the scale."
+        },
+        "max": {
+          "name": "Maximum",
+          "description": "Upper end of the scale."
+        },
+        "label": {
+          "name": "Label",
+          "description": "Text above the bar."
+        },
+        "font": {
+          "name": "Font",
+          "description": "Short font name, e.g. DejaVuSans12bw_bwfont or builtin5x7."
+        },
+        "x": {
+          "name": "x",
+          "description": "Left edge."
+        },
+        "y": {
+          "name": "y",
+          "description": "Top edge."
+        },
+        "width": {
+          "name": "Width",
+          "description": "Width in pixels."
+        },
+        "height": {
+          "name": "Height",
+          "description": "Height in pixels."
+        },
+        "duration": {
+          "name": "Duration",
+          "description": "How long the message stays before the display returns to normal operation."
+        },
+        "priority": {
+          "name": "Priority",
+          "description": "Higher priority replaces a running message."
+        }
+      }
+    },
+    "set_pixel": {
+      "name": "Set pixel",
+      "description": "Turns a single dot on.",
+      "fields": {
+        "device_id": {
+          "name": "Display",
+          "description": "Which Flipdot display to target. Applies to all if omitted."
+        },
+        "x": {
+          "name": "x",
+          "description": "Column."
+        },
+        "y": {
+          "name": "y",
+          "description": "Row."
+        }
+      }
+    },
+    "clear_pixel": {
+      "name": "Clear pixel",
+      "description": "Turns a single dot off.",
+      "fields": {
+        "device_id": {
+          "name": "Display",
+          "description": "Which Flipdot display to target. Applies to all if omitted."
+        },
+        "x": {
+          "name": "x",
+          "description": "Column."
+        },
+        "y": {
+          "name": "y",
+          "description": "Row."
+        }
+      }
+    },
+    "clear": {
+      "name": "Clear display",
+      "description": "Turns all dots off.",
+      "fields": {
+        "device_id": {
+          "name": "Display",
+          "description": "Which Flipdot display to target. Applies to all if omitted."
+        }
+      }
+    },
+    "effect": {
+      "name": "Play effect",
+      "description": "Plays a short animation.",
+      "fields": {
+        "device_id": {
+          "name": "Display",
+          "description": "Which Flipdot display to target. Applies to all if omitted."
+        },
+        "effect": {
+          "name": "Effect",
+          "description": "Which effect."
+        },
+        "frames": {
+          "name": "Frames",
+          "description": "Number of frames."
+        },
+        "delay": {
+          "name": "Delay",
+          "description": "Delay between frames."
+        },
+        "priority": {
+          "name": "Priority",
+          "description": "Higher priority replaces a running message."
+        }
+      }
+    },
+    "show_page": {
+      "name": "Show page",
+      "description": "Immediately shows a page defined in fluepdot_pages.yaml.",
+      "fields": {
+        "device_id": {
+          "name": "Display",
+          "description": "Which Flipdot display to target. Applies to all if omitted."
+        },
+        "page_id": {
+          "name": "Page",
+          "description": "The page id."
+        },
+        "duration": {
+          "name": "Duration",
+          "description": "How long the message stays before the display returns to normal operation."
+        },
+        "priority": {
+          "name": "Priority",
+          "description": "Higher priority replaces a running message."
+        }
+      }
+    },
+    "reload_pages": {
+      "name": "Reload pages",
+      "description": "Re-reads fluepdot_pages.yaml without restarting.",
+      "fields": {
+        "device_id": {
+          "name": "Display",
+          "description": "Which Flipdot display to target. Applies to all if omitted."
+        }
+      }
+    },
+    "extract_fonts": {
+      "name": "Measure fonts",
+      "description": "Renders every character once on the board and measures the glyphs, so Home Assistant can typeset the same fonts itself. Takes several minutes and is audibly noisy.",
+      "fields": {
+        "device_id": {
+          "name": "Display",
+          "description": "Which Flipdot display to target. Applies to all if omitted."
+        },
+        "fonts": {
+          "name": "Fonts",
+          "description": "Which fonts to measure."
+        },
+        "charset": {
+          "name": "Character set",
+          "description": "Which characters to measure."
+        }
+      }
+    },
+    "set_rendering_timings": {
+      "name": "Set timings",
+      "description": "Sets the per-column drive timings. Values that are too short leave dots stuck.",
+      "fields": {
+        "device_id": {
+          "name": "Display",
+          "description": "Which Flipdot display to target. Applies to all if omitted."
+        },
+        "pre": {
+          "name": "Pre-delay",
+          "description": "Pre delay."
+        },
+        "clear": {
+          "name": "Clear delay",
+          "description": "Time to clear a dot."
+        },
+        "set": {
+          "name": "Set delay",
+          "description": "Time to set a dot."
+        }
+      }
+    }
+  }
+}

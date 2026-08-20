@@ -1,0 +1,502 @@
+# Aktionen der Flipdot-Integration
+
+send_text:
+  fields:
+    device_id:
+      required: false
+      selector:
+        device:
+          integration: fluepdot
+    text:
+      required: true
+      example: "Hallo Welt"
+      selector:
+        text:
+    font:
+      required: false
+      example: DejaVuSans12bw_bwfont
+      selector:
+        text:
+    mode:
+      required: false
+      default: device
+      selector:
+        select:
+          options:
+            - device
+            - compose
+    align:
+      required: false
+      default: left
+      selector:
+        select:
+          options:
+            - left
+            - center
+            - right
+    valign:
+      required: false
+      default: middle
+      selector:
+        select:
+          options:
+            - top
+            - middle
+            - bottom
+    icon:
+      required: false
+      selector:
+        select:
+          options:
+            - sun
+            - cloud
+            - rain
+            - snow
+            - bolt
+            - house
+            - bin
+            - bell
+            - drop
+            - check
+            - cross
+            - arrow_up
+            - arrow_down
+            - person
+            - washer
+    x:
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 200
+          mode: box
+    y:
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 15
+          mode: box
+    clear:
+      required: false
+      default: true
+      selector:
+        boolean:
+    duration:
+      required: false
+      selector:
+        number:
+          min: 1
+          max: 3600
+          unit_of_measurement: s
+          mode: box
+    priority:
+      required: false
+      default: normal
+      selector:
+        select:
+          options:
+            - background
+            - normal
+            - high
+            - alarm
+
+send_lines:
+  fields:
+    device_id:
+      required: false
+      selector:
+        device:
+          integration: fluepdot
+    lines:
+      required: true
+      example: |
+        - "Waesche fertig"
+        - "seit 10 Minuten"
+      selector:
+        object:
+    font:
+      required: false
+      selector:
+        text:
+    align:
+      required: false
+      default: center
+      selector:
+        select:
+          options: [left, center, right]
+    valign:
+      required: false
+      default: middle
+      selector:
+        select:
+          options: [top, middle, bottom]
+    icon:
+      required: false
+      selector:
+        text:
+    duration:
+      required: false
+      selector:
+        number:
+          min: 1
+          max: 3600
+          unit_of_measurement: s
+          mode: box
+    priority:
+      required: false
+      default: normal
+      selector:
+        select:
+          options: [background, normal, high, alarm]
+
+marquee:
+  fields:
+    device_id:
+      required: false
+      selector:
+        device:
+          integration: fluepdot
+    text:
+      required: true
+      selector:
+        text:
+    font:
+      required: false
+      selector:
+        text:
+    step:
+      required: false
+      default: 3
+      selector:
+        number:
+          min: 1
+          max: 20
+          mode: slider
+    delay:
+      required: false
+      default: 0.35
+      selector:
+        number:
+          min: 0.1
+          max: 5
+          step: 0.05
+          unit_of_measurement: s
+          mode: box
+    repeat:
+      required: false
+      default: 1
+      selector:
+        number:
+          min: 1
+          max: 10
+          mode: slider
+    y:
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 15
+          mode: box
+    priority:
+      required: false
+      default: normal
+      selector:
+        select:
+          options: [background, normal, high, alarm]
+
+draw:
+  fields:
+    device_id:
+      required: false
+      selector:
+        device:
+          integration: fluepdot
+    framebuffer:
+      required: true
+      selector:
+        text:
+          multiline: true
+    duration:
+      required: false
+      selector:
+        number:
+          min: 1
+          max: 3600
+          unit_of_measurement: s
+          mode: box
+    priority:
+      required: false
+      default: normal
+      selector:
+        select:
+          options: [background, normal, high, alarm]
+
+draw_bar:
+  fields:
+    device_id:
+      required: false
+      selector:
+        device:
+          integration: fluepdot
+    value:
+      required: true
+      selector:
+        number:
+          min: -100000
+          max: 100000
+          mode: box
+    min:
+      required: false
+      default: 0
+      selector:
+        number:
+          min: -100000
+          max: 100000
+          mode: box
+    max:
+      required: false
+      default: 100
+      selector:
+        number:
+          min: -100000
+          max: 100000
+          mode: box
+    label:
+      required: false
+      selector:
+        text:
+    font:
+      required: false
+      selector:
+        text:
+    x:
+      required: false
+      default: 0
+      selector:
+        number:
+          min: 0
+          max: 200
+          mode: box
+    y:
+      required: false
+      default: 10
+      selector:
+        number:
+          min: 0
+          max: 15
+          mode: box
+    width:
+      required: false
+      selector:
+        number:
+          min: 3
+          max: 200
+          mode: box
+    height:
+      required: false
+      default: 5
+      selector:
+        number:
+          min: 1
+          max: 16
+          mode: box
+    duration:
+      required: false
+      selector:
+        number:
+          min: 1
+          max: 3600
+          unit_of_measurement: s
+          mode: box
+    priority:
+      required: false
+      default: normal
+      selector:
+        select:
+          options: [background, normal, high, alarm]
+
+set_pixel:
+  fields:
+    device_id:
+      required: false
+      selector:
+        device:
+          integration: fluepdot
+    x:
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 200
+          mode: box
+    y:
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 15
+          mode: box
+
+clear_pixel:
+  fields:
+    device_id:
+      required: false
+      selector:
+        device:
+          integration: fluepdot
+    x:
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 200
+          mode: box
+    y:
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 15
+          mode: box
+
+clear:
+  fields:
+    device_id:
+      required: false
+      selector:
+        device:
+          integration: fluepdot
+
+effect:
+  fields:
+    device_id:
+      required: false
+      selector:
+        device:
+          integration: fluepdot
+    effect:
+      required: true
+      selector:
+        select:
+          options:
+            - wipe
+            - dissolve
+            - matrix
+            - blink
+            - snow
+            - invert
+    frames:
+      required: false
+      default: 12
+      selector:
+        number:
+          min: 2
+          max: 60
+          mode: slider
+    delay:
+      required: false
+      default: 0.25
+      selector:
+        number:
+          min: 0.1
+          max: 5
+          step: 0.05
+          unit_of_measurement: s
+          mode: box
+    priority:
+      required: false
+      default: normal
+      selector:
+        select:
+          options: [background, normal, high, alarm]
+
+show_page:
+  fields:
+    device_id:
+      required: false
+      selector:
+        device:
+          integration: fluepdot
+    page_id:
+      required: true
+      example: datum
+      selector:
+        text:
+    duration:
+      required: false
+      selector:
+        number:
+          min: 1
+          max: 3600
+          unit_of_measurement: s
+          mode: box
+    priority:
+      required: false
+      default: normal
+      selector:
+        select:
+          options: [background, normal, high, alarm]
+
+reload_pages:
+  fields:
+    device_id:
+      required: false
+      selector:
+        device:
+          integration: fluepdot
+
+extract_fonts:
+  fields:
+    device_id:
+      required: false
+      selector:
+        device:
+          integration: fluepdot
+    fonts:
+      required: false
+      example: |
+        - DejaVuSans12bw_bwfont
+        - fixed_5x8
+      selector:
+        object:
+    charset:
+      required: false
+      selector:
+        text:
+          multiline: true
+
+set_rendering_timings:
+  fields:
+    device_id:
+      required: false
+      selector:
+        device:
+          integration: fluepdot
+    pre:
+      required: false
+      default: 0
+      selector:
+        number:
+          min: 0
+          max: 60000
+          unit_of_measurement: µs
+          mode: box
+    clear:
+      required: false
+      default: 1600
+      selector:
+        number:
+          min: 50
+          max: 60000
+          unit_of_measurement: µs
+          mode: box
+    set:
+      required: false
+      default: 1600
+      selector:
+        number:
+          min: 50
+          max: 60000
+          unit_of_measurement: µs
+          mode: box

@@ -15,6 +15,9 @@ from .const import (
     ALIGNMENTS,
     ALIGN_CENTER,
     ALIGN_LEFT,
+    BOX_OUTLINE,
+    BOX_STYLES,
+    DEFAULT_VIA_PREFIX,
     DOMAIN,
     EFFECTS,
     MODE_COMPOSE,
@@ -24,6 +27,7 @@ from .const import (
     RENDER_MODES,
     SERVICE_CLEAR,
     SERVICE_CLEAR_PIXEL,
+    SERVICE_DESTINATION_SIGN,
     SERVICE_DRAW,
     SERVICE_DRAW_BAR,
     SERVICE_EFFECT,
@@ -41,7 +45,8 @@ from .const import (
 )
 from .controller import FluepdotController
 from .framebuffer import ICONS, Framebuffer
-from .render import Payload, lines_payload, raw_payload, text_payload
+from .render import Payload, lines_payload, raw_payload, sign_payload, text_payload
+from .sign import SignSpec, sign_frames
 
 TARGET_SCHEMA = {
     vol.Optional("device_id"): cv.string,
@@ -88,6 +93,26 @@ MARQUEE_SCHEMA = vol.Schema(
         ),
         vol.Optional("repeat", default=1): vol.All(vol.Coerce(int), vol.Range(1, 10)),
         vol.Optional("y"): vol.Coerce(int),
+        vol.Optional("priority", default=PRIORITY_NORMAL): vol.In(PRIORITIES),
+    }
+)
+
+DESTINATION_SIGN_SCHEMA = vol.Schema(
+    {
+        **TARGET_SCHEMA,
+        vol.Required("destination"): cv.string,
+        vol.Optional("line_number", default=""): cv.string,
+        vol.Optional("via", default=""): cv.string,
+        vol.Optional("via_prefix", default=DEFAULT_VIA_PREFIX): cv.string,
+        vol.Optional("box", default=BOX_OUTLINE): vol.In(BOX_STYLES),
+        vol.Optional("font"): cv.string,
+        vol.Optional("scroll", default=False): cv.boolean,
+        vol.Optional("step", default=3): vol.All(vol.Coerce(int), vol.Range(1, 20)),
+        vol.Optional("delay", default=0.35): vol.All(
+            vol.Coerce(float), vol.Range(0.1, 5)
+        ),
+        vol.Optional("repeat", default=1): vol.All(vol.Coerce(int), vol.Range(1, 10)),
+        vol.Optional("duration"): vol.Coerce(float),
         vol.Optional("priority", default=PRIORITY_NORMAL): vol.In(PRIORITIES),
     }
 )
@@ -275,6 +300,40 @@ async def _handle_marquee(hass: HomeAssistant, call: ServiceCall) -> None:
             call.data.get("delay", 0.35),
             f"Lauftext: {text}",
             call.data.get("priority", PRIORITY_NORMAL),
+        )
+
+
+async def _handle_destination_sign(hass: HomeAssistant, call: ServiceCall) -> None:
+    for controller in _controllers(hass, call):
+        spec = SignSpec(
+            line_number=call.data.get("line_number", ""),
+            destination=call.data["destination"],
+            via=call.data.get("via", ""),
+            via_prefix=call.data.get("via_prefix", DEFAULT_VIA_PREFIX),
+            box=call.data.get("box", BOX_OUTLINE),
+            font=call.data.get("font"),
+        )
+        if call.data.get("scroll"):
+            frames = sign_frames(
+                spec,
+                controller.fonts,
+                controller.width,
+                controller.height,
+                call.data.get("step", 3),
+                call.data.get("repeat", 1),
+            )
+            await controller.async_animate(
+                frames,
+                call.data.get("delay", 0.35),
+                spec.summary(),
+                call.data.get("priority", PRIORITY_NORMAL),
+            )
+            continue
+        await controller.async_show(
+            sign_payload(spec),
+            priority=call.data.get("priority", PRIORITY_NORMAL),
+            duration=call.data.get("duration"),
+            source=SOURCE_SERVICE,
         )
 
 
@@ -476,6 +535,11 @@ def async_register_services(hass: HomeAssistant) -> None:
         (SERVICE_SEND_TEXT, _handle_send_text, SEND_TEXT_SCHEMA),
         (SERVICE_SEND_LINES, _handle_send_lines, SEND_LINES_SCHEMA),
         (SERVICE_MARQUEE, _handle_marquee, MARQUEE_SCHEMA),
+        (
+            SERVICE_DESTINATION_SIGN,
+            _handle_destination_sign,
+            DESTINATION_SIGN_SCHEMA,
+        ),
         (SERVICE_DRAW, _handle_draw, DRAW_SCHEMA),
         (SERVICE_DRAW_BAR, _handle_draw_bar, DRAW_BAR_SCHEMA),
         (SERVICE_SET_PIXEL, _handle_set_pixel, PIXEL_SCHEMA),
@@ -505,6 +569,7 @@ def async_unregister_services(hass: HomeAssistant) -> None:
         SERVICE_SEND_TEXT,
         SERVICE_SEND_LINES,
         SERVICE_MARQUEE,
+        SERVICE_DESTINATION_SIGN,
         SERVICE_DRAW,
         SERVICE_DRAW_BAR,
         SERVICE_SET_PIXEL,

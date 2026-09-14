@@ -20,6 +20,7 @@ import logging
 _LOGGER = logging.getLogger(__name__)
 
 BUILTIN_FONT_NAME = "builtin5x7"
+BUILTIN_SMALL_FONT_NAME = "builtin3x5"
 
 
 @dataclass(slots=True)
@@ -277,11 +278,89 @@ def builtin_font() -> Font:
     )
 
 
+# --- Mitgelieferter 3x5-Font ----------------------------------------------
+# Fuer die kleine zweite Zeile der Zielanzeige. Hier zeilenweise notiert (wie
+# die Symbole in framebuffer.py) - bei drei Pixeln Breite ist das deutlich
+# besser zu pruefen als Hexmasken; umgerechnet wird beim Aufbau.
+#
+# In fuenf Zeilen ist kein Platz fuer Unterlaengen, deshalb kennt diese Schrift
+# nur Versalien; Kleinbuchstaben bekommen dieselbe Glyphe. Auf einer
+# Zielanzeige ist das genau richtig: "ueber Rathaus" wird zu "UEBER RATHAUS".
+_BUILTIN_3X5: dict[str, str] = {
+    "0": "XXX|X.X|X.X|X.X|XXX", "1": ".X.|XX.|.X.|.X.|XXX",
+    "2": "XXX|..X|XXX|X..|XXX", "3": "XXX|..X|XXX|..X|XXX",
+    "4": "X.X|X.X|XXX|..X|..X", "5": "XXX|X..|XXX|..X|XXX",
+    "6": "XXX|X..|XXX|X.X|XXX", "7": "XXX|..X|..X|..X|..X",
+    "8": "XXX|X.X|XXX|X.X|XXX", "9": "XXX|X.X|XXX|..X|XXX",
+    "A": ".X.|X.X|XXX|X.X|X.X", "B": "XX.|X.X|XX.|X.X|XX.",
+    "C": ".XX|X..|X..|X..|.XX", "D": "XX.|X.X|X.X|X.X|XX.",
+    "E": "XXX|X..|XX.|X..|XXX", "F": "XXX|X..|XX.|X..|X..",
+    "G": ".XX|X..|X.X|X.X|.XX", "H": "X.X|X.X|XXX|X.X|X.X",
+    "I": "XXX|.X.|.X.|.X.|XXX", "J": "..X|..X|..X|X.X|.X.",
+    "K": "X.X|X.X|XX.|X.X|X.X", "L": "X..|X..|X..|X..|XXX",
+    "M": "X.X|XXX|XXX|X.X|X.X", "N": "X.X|XXX|XXX|XXX|X.X",
+    "O": ".X.|X.X|X.X|X.X|.X.", "P": "XX.|X.X|XX.|X..|X..",
+    "Q": ".X.|X.X|X.X|XXX|.XX", "R": "XX.|X.X|XX.|X.X|X.X",
+    "S": ".XX|X..|.X.|..X|XX.", "T": "XXX|.X.|.X.|.X.|.X.",
+    "U": "X.X|X.X|X.X|X.X|XXX", "V": "X.X|X.X|X.X|X.X|.X.",
+    "W": "X.X|X.X|XXX|XXX|X.X", "X": "X.X|X.X|.X.|X.X|X.X",
+    "Y": "X.X|X.X|.X.|.X.|.X.", "Z": "XXX|..X|.X.|X..|XXX",
+    # Umlaute: Puenktchen in Zeile 0, darunter eine Leerzeile, dann der
+    # gestauchte Grundbuchstabe.
+    "Ä": "X.X|...|XXX|X.X|X.X", "Ö": "X.X|...|X.X|X.X|XXX",
+    "Ü": "X.X|...|X.X|X.X|XXX", "ß": "XX.|X.X|XX.|X.X|XX.",
+    ".": "...|...|...|...|.X.", ",": "...|...|...|.X.|X..",
+    ":": "...|.X.|...|.X.|...", ";": "...|.X.|...|.X.|X..",
+    "-": "...|...|XXX|...|...", "_": "...|...|...|...|XXX",
+    "/": "..X|..X|.X.|X..|X..", "\\": "X..|X..|.X.|..X|..X",
+    "+": "...|.X.|XXX|.X.|...", "=": "...|XXX|...|XXX|...",
+    "!": ".X.|.X.|.X.|...|.X.", "?": "XX.|..X|.X.|...|.X.",
+    "(": "..X|.X.|.X.|.X.|..X", ")": "X..|.X.|.X.|.X.|X..",
+    "'": ".X.|.X.|...|...|...", '"': "X.X|X.X|...|...|...",
+    "*": "X.X|.X.|X.X|...|...", "°": "XX.|XX.|...|...|...",
+    "<": "..X|.X.|X..|.X.|..X", ">": "X..|.X.|..X|.X.|X..",
+}
+
+
+def builtin_small_font() -> Font:
+    """Den mitgelieferten 3x5-Font aus der Zeilen-Notation aufbauen."""
+    glyphs: dict[str, Glyph] = {}
+    for char, art in _BUILTIN_3X5.items():
+        rows = art.split("|")
+        cols = [
+            sum(1 << index for index, row in enumerate(rows) if row[column] == "X")
+            for column in range(len(rows[0]))
+        ]
+        # Leere Randspalten wegnehmen, damit schmale Zeichen nicht so weit
+        # auseinanderstehen; die Luecke bleibt als Vorschub erhalten.
+        while cols and cols[-1] == 0:
+            cols.pop()
+        left = 0
+        while cols and cols[0] == 0:
+            cols.pop(0)
+            left += 1
+        glyph = Glyph(cols=cols, advance=len(cols) + left + 1, left=left)
+        glyphs[char] = glyph
+        if char.isalpha():
+            glyphs.setdefault(char.lower(), glyph)
+    glyphs[" "] = Glyph(cols=[], advance=2)
+    return Font(
+        name=BUILTIN_SMALL_FONT_NAME,
+        height=5,
+        glyphs=glyphs,
+        source="builtin",
+        space_advance=2,
+    )
+
+
 class FontRegistry:
     """Haelt alle bekannten Schriften (mitgeliefert + vom Geraet gemessen)."""
 
     def __init__(self) -> None:
-        self._fonts: dict[str, Font] = {BUILTIN_FONT_NAME: builtin_font()}
+        self._fonts: dict[str, Font] = {
+            BUILTIN_FONT_NAME: builtin_font(),
+            BUILTIN_SMALL_FONT_NAME: builtin_small_font(),
+        }
         self.device_fonts: list[str] = []
 
     @property

@@ -267,6 +267,64 @@
         }
       }
     },
+    "destination_sign": {
+      "name": "Zielanzeige",
+      "description": "Laesst die Tafel aussehen wie die Zielanzeige im Bus oder in der Strassenbahn: Liniennummer im Kasten links, Ziel daneben, Zwischenziel kleiner darunter.",
+      "fields": {
+        "device_id": {
+          "name": "Anzeige",
+          "description": "Welche Flipdot-Anzeige gemeint ist. Ohne Angabe gelten alle."
+        },
+        "line_number": {
+          "name": "Liniennummer",
+          "description": "Steht im Kasten links. Ohne Angabe entfaellt der Kasten."
+        },
+        "destination": {
+          "name": "Ziel",
+          "description": "Die grosse Zeile, ueblicherweise die Endhaltestelle."
+        },
+        "via": {
+          "name": "Zwischenziel",
+          "description": "Kleiner in der zweiten Zeile. Ohne Angabe bleibt die Anzeige einzeilig."
+        },
+        "via_prefix": {
+          "name": "Vorsatz",
+          "description": "Steht vor dem Zwischenziel. Leer lassen, um nur das Zwischenziel zu zeigen."
+        },
+        "box": {
+          "name": "Kasten",
+          "description": "outline zeichnet einen Rahmen, filled stanzt die Nummer aus einem vollen Block, none laesst die Nummer frei stehen."
+        },
+        "font": {
+          "name": "Schriftart",
+          "description": "Kurzname der Schrift, z. B. DejaVuSans12bw_bwfont oder builtin5x7."
+        },
+        "scroll": {
+          "name": "Durchlaufen",
+          "description": "Ziel und Zwischenziel durchlaufen lassen statt sie zu verkleinern. Der Kasten bleibt stehen. Klappert deutlich hoerbar."
+        },
+        "step": {
+          "name": "Schrittweite",
+          "description": "Punkte je Schritt. Wirkt nur beim Durchlaufen."
+        },
+        "delay": {
+          "name": "Pause",
+          "description": "Pause zwischen den Schritten. Wirkt nur beim Durchlaufen."
+        },
+        "repeat": {
+          "name": "Durchlaeufe",
+          "description": "Wie oft der Text laeuft. Wirkt nur beim Durchlaufen."
+        },
+        "duration": {
+          "name": "Dauer",
+          "description": "Wie lange die Nachricht stehen bleibt. Danach kehrt die Anzeige zum Normalbetrieb zurueck."
+        },
+        "priority": {
+          "name": "Prioritaet",
+          "description": "Hoehere Prioritaet verdraengt eine laufende Nachricht."
+        }
+      }
+    },
     "draw": {
       "name": "Rohbild zeichnen",
       "description": "Schreibt einen kompletten Framebuffer: 16 Zeilen, X = Punkt an, Leerzeichen = Punkt aus.",

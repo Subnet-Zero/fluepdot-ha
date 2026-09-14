@@ -267,6 +267,64 @@
         }
       }
     },
+    "destination_sign": {
+      "name": "Destination sign",
+      "description": "Makes the display look like the destination sign on a bus or tram: line number in a box on the left, destination next to it, and the stop it runs via smaller underneath.",
+      "fields": {
+        "device_id": {
+          "name": "Display",
+          "description": "Which Flipdot display to target. Applies to all if omitted."
+        },
+        "line_number": {
+          "name": "Line number",
+          "description": "Shown in the box on the left. Without it there is no box."
+        },
+        "destination": {
+          "name": "Destination",
+          "description": "The big line, usually the final stop."
+        },
+        "via": {
+          "name": "Via",
+          "description": "Intermediate stop, smaller on the second line. Without it the sign stays single-line."
+        },
+        "via_prefix": {
+          "name": "Via prefix",
+          "description": "Placed in front of the intermediate stop. Leave empty to show the stop on its own."
+        },
+        "box": {
+          "name": "Box",
+          "description": "outline draws a frame, filled punches the number out of a solid block, none leaves the number standing free."
+        },
+        "font": {
+          "name": "Font",
+          "description": "Short font name, e.g. DejaVuSans12bw_bwfont or builtin5x7."
+        },
+        "scroll": {
+          "name": "Scroll",
+          "description": "Run destination and intermediate stop through instead of shrinking them. The box stays put. Audibly noisy."
+        },
+        "step": {
+          "name": "Step",
+          "description": "Pixels per step. Only applies while scrolling."
+        },
+        "delay": {
+          "name": "Delay",
+          "description": "Delay between steps. Only applies while scrolling."
+        },
+        "repeat": {
+          "name": "Repeats",
+          "description": "How often the text runs. Only applies while scrolling."
+        },
+        "duration": {
+          "name": "Duration",
+          "description": "How long the message stays before the display returns to normal operation."
+        },
+        "priority": {
+          "name": "Priority",
+          "description": "Higher priority replaces a running message."
+        }
+      }
+    },
     "draw": {
       "name": "Draw raw image",
       "description": "Writes a complete framebuffer: 16 lines, X = dot on, space = dot off.",

@@ -19,6 +19,7 @@ from .const import (
 )
 from .fonts import BUILTIN_FONT_NAME, FontRegistry
 from .framebuffer import Framebuffer
+from .sign import SignSpec, render_sign
 
 # Eine Zeichenanweisung bekommt den Framebuffer und malt hinein.
 DrawOp = Callable[[Framebuffer], None]
@@ -41,12 +42,15 @@ class Payload:
     raw: str | None = None
     ops: list[DrawOp] = field(default_factory=list)
     invert: bool = False
+    sign: SignSpec | None = None
     description: str = ""
 
     def summary(self) -> str:
         """Kurzbeschreibung fuer sensor.flipdot_inhalt."""
         if self.description:
             return self.description
+        if self.kind == "sign" and self.sign is not None:
+            return self.sign.summary()
         if self.kind == "raw":
             return "Rohbild"
         if self.lines:
@@ -62,7 +66,9 @@ class Payload:
         """Payload in einen fertigen Framebuffer umsetzen."""
         buffer = Framebuffer(width, height)
 
-        if self.kind == "raw" and self.raw is not None:
+        if self.kind == "sign" and self.sign is not None:
+            buffer = render_sign(self.sign, registry, width, height)
+        elif self.kind == "raw" and self.raw is not None:
             buffer = Framebuffer.from_ascii(self.raw, width, height)
         else:
             font = registry.get(self.font)
@@ -112,7 +118,7 @@ class Payload:
         """
         return (
             self.mode == MODE_COMPOSE
-            or self.kind == "raw"
+            or self.kind in ("raw", "sign")
             or bool(self.ops)
             or bool(self.lines)
             or self.invert
@@ -158,6 +164,15 @@ def lines_payload(
         valign=valign,
         mode=MODE_COMPOSE,
         description=description,
+    )
+
+
+def sign_payload(spec: SignSpec, description: str = "") -> Payload:
+    return Payload(
+        kind="sign",
+        sign=spec,
+        mode=MODE_COMPOSE,
+        description=description or spec.summary(),
     )
 
 

@@ -17,7 +17,8 @@
 `fluepdot` hangs a real, mechanical [flip-dot display](https://github.com/Fluepke/fluepdot) — the
 kind of clattering dot-matrix panel that used to sit above bus doors — directly off Home
 Assistant. Not "one switch that sends a string": a device, entities, live preview, a priority
-queue, quiet hours, and thirteen actions to draw text, bars, icons, marquees and raw frames on it.
+queue, quiet hours, and fourteen actions to draw text, bars, icons, marquees, destination signs
+and raw frames on it.
 
 <div align="center">
   <img src="docs/preview.png" alt="Live preview of the fluepdot device inside Home Assistant" width="500">
@@ -93,10 +94,10 @@ One device, 24 entities:
 
 ### Actions
 
-`fluepdot.send_text` · `send_lines` · `marquee` · `draw` · `draw_bar` · `set_pixel` ·
-`clear_pixel` · `clear` · `effect` (wipe / dissolve / matrix / blink / snow / invert) ·
-`show_page` · `reload_pages` · `extract_fonts` · `set_rendering_timings` — all with UI selectors,
-so they're usable straight from the Developer Tools → Actions tab without writing YAML.
+`fluepdot.send_text` · `send_lines` · `marquee` · `destination_sign` · `draw` · `draw_bar` ·
+`set_pixel` · `clear_pixel` · `clear` · `effect` (wipe / dissolve / matrix / blink / snow /
+invert) · `show_page` · `reload_pages` · `extract_fonts` · `set_rendering_timings` — all with UI
+selectors, so they're usable straight from the Developer Tools → Actions tab without writing YAML.
 
 Two render paths, picked automatically or explicitly via `mode`:
 
@@ -108,6 +109,33 @@ Two render paths, picked automatically or explicitly via `mode`:
 
 Anything with `align` other than left automatically upgrades to `compose`, since the firmware
 has no concept of alignment on its own.
+
+### Destination signs
+
+`fluepdot.destination_sign` makes the board do the one job these panels were built for: the
+line number in a box on the left, the destination beside it, and the stop it runs via smaller
+underneath.
+
+```yaml
+action: fluepdot.destination_sign
+data:
+  line_number: M29
+  destination: Hauptbahnhof
+  via: Rathaus
+  duration: 60
+```
+
+`box` picks the style — `outline` (default, a frame around the number), `filled` (the number
+punched out of a solid block) or `none`. The via line uses `builtin3x5`, a 3×5 bitmap font that
+ships with the integration so the second line is legible on a 16-row panel without running
+`extract_fonts` first; it is capitals-only, because five rows leave no room for descenders.
+A destination too wide for the remaining space drops to the small font and is truncated after
+that — or set `scroll: true` to let destination and via run through while the box stays put,
+the way a real vehicle does it.
+
+`scripts/preview_sign.py` renders the same layouts without Home Assistant and prints them as
+ASCII you can paste straight into `fluepdot.draw`, which is handy for checking a change against
+the real board before deploying it.
 
 ### Rotation pages: `fluepdot_pages.yaml`
 
@@ -136,6 +164,19 @@ pages:
     lines:
       - "{{ state_attr('weather.home','temperature') | round(0) }}°"
       - "{{ states('weather.home') }}"
+```
+
+A page can also be a destination sign, with the same three parts as the action:
+
+```yaml
+  - id: bus
+    name: Next bus
+    enabled: false
+    duration: 30
+    sign:
+      line_number: "{{ states('sensor.bus_line') }}"
+      destination: "{{ states('sensor.bus_destination') }}"
+      via: "{{ states('sensor.bus_via') }}"
 ```
 
 Edit the file, then call `fluepdot.reload_pages` — no restart needed. A page can carry a Jinja

@@ -19,11 +19,15 @@ from homeassistant.helpers.template import Template
 from .const import (
     ALIGN_CENTER,
     ALIGN_LEFT,
+    BOX_OUTLINE,
+    BOX_STYLES,
+    DEFAULT_VIA_PREFIX,
     MODE_COMPOSE,
     MODE_DEVICE,
     VALIGN_MIDDLE,
 )
 from .render import Payload
+from .sign import SignSpec
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -48,6 +52,10 @@ DEFAULT_PAGES_YAML = '''# Rotationsseiten der Flipdot-Anzeige
 #   icon       Symbol links neben dem Text (compose): sun cloud rain snow bolt
 #              house bin bell drop check cross arrow_up arrow_down person washer
 #   bar        Balken: value/min/max (Templates) plus x y width height
+#   sign       Zielanzeige wie im Bus: Liniennummer im Kasten links, Ziel
+#              daneben, Zwischenziel klein darunter. Felder line_number,
+#              destination und via sind Templates; dazu box (outline, filled
+#              oder none), via_prefix und font. Schliesst text/lines aus.
 
 pages:
   # --- Standard: das Datum, unveraendert wie seit Jahren -------------------
@@ -132,6 +140,18 @@ pages:
       width: 115
       height: 3
 
+  - id: bus
+    name: Naechster Bus
+    enabled: false
+    duration: 30
+    condition: >
+      {{ states('sensor.bus_linie') not in ['unknown', 'unavailable', ''] }}
+    sign:
+      line_number: "{{ states('sensor.bus_linie') }}"
+      destination: "{{ states('sensor.bus_ziel') }}"
+      via: "{{ states('sensor.bus_zwischenziel') }}"
+      box: outline
+
   - id: waesche
     name: Waesche fertig
     enabled: false
@@ -165,6 +185,7 @@ class Page:
     icon_x: int = 0
     icon_y: int = 4
     bar: dict[str, Any] | None = None
+    sign: dict[str, Any] | None = None
 
     def _render_template(self, hass: HomeAssistant, raw: str) -> str:
         template = Template(raw, hass)
@@ -183,8 +204,48 @@ class Page:
             return False
         return result.lower() in ("true", "1", "on", "yes")
 
+    def _build_sign(self, hass: HomeAssistant) -> Payload | None:
+        """Seite als Zielanzeige rendern."""
+        spec_raw = dict(self.sign or {})
+        try:
+            line_number = self._render_template(
+                hass, str(spec_raw.get("line_number") or "")
+            )
+            destination = self._render_template(
+                hass, str(spec_raw.get("destination") or "")
+            )
+            via = self._render_template(hass, str(spec_raw.get("via") or ""))
+        except TemplateError as err:
+            _LOGGER.warning(
+                "Zielanzeige der Seite %s laesst sich nicht rendern: %s",
+                self.page_id,
+                err,
+            )
+            return None
+
+        if not destination and not line_number:
+            return None
+
+        prefix = spec_raw.get("via_prefix", DEFAULT_VIA_PREFIX)
+        box = str(spec_raw.get("box") or BOX_OUTLINE)
+        spec = SignSpec(
+            line_number=line_number,
+            destination=destination,
+            via=via,
+            via_prefix=DEFAULT_VIA_PREFIX if prefix is None else str(prefix),
+            box=box if box in BOX_STYLES else BOX_OUTLINE,
+            font=spec_raw.get("font") or self.font,
+        )
+        return Payload(
+            kind="sign", sign=spec, mode=MODE_COMPOSE, description=self.name
+        )
+
     def build(self, hass: HomeAssistant) -> Payload | None:
         """Seite zu einem Payload rendern."""
+        if self.sign:
+            # Zielanzeige belegt die ganze Tafel - text/lines waeren sinnlos.
+            return self._build_sign(hass)
+
         try:
             text = self._render_template(hass, self.text) if self.text else ""
             lines = [self._render_template(hass, line) for line in self.lines]
@@ -267,6 +328,7 @@ def _as_page(raw: dict[str, Any]) -> Page | None:
         icon_x=int(raw.get("icon_x", 0)),
         icon_y=int(raw.get("icon_y", 4)),
         bar=raw.get("bar"),
+        sign=raw.get("sign"),
     )
 
 

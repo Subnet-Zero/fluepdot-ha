@@ -39,6 +39,14 @@ ALIGN_CENTER: Final = "center"
 ALIGN_RIGHT: Final = "right"
 ALIGNMENTS: Final = [ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT]
 
+# --- Zielanzeige (destination_sign) ----------------------------------------
+BOX_OUTLINE: Final = "outline"
+BOX_FILLED: Final = "filled"
+BOX_NONE: Final = "none"
+BOX_STYLES: Final = [BOX_OUTLINE, BOX_FILLED, BOX_NONE]
+
+DEFAULT_VIA_PREFIX: Final = "über"
+
 VALIGN_TOP: Final = "top"
 VALIGN_MIDDLE: Final = "middle"
 VALIGN_BOTTOM: Final = "bottom"
@@ -91,6 +99,7 @@ SERVICE_SHOW_PAGE: Final = "show_page"
 SERVICE_RELOAD_PAGES: Final = "reload_pages"
 SERVICE_EXTRACT_FONTS: Final = "extract_fonts"
 SERVICE_SET_TIMINGS: Final = "set_rendering_timings"
+SERVICE_DESTINATION_SIGN: Final = "destination_sign"
 
 EFFECTS: Final = ["wipe", "dissolve", "matrix", "blink", "snow", "invert"]
 

@@ -22,6 +22,8 @@ from homeassistant.util import dt as dt_util
 from .client import FluepdotClient, FluepdotError
 from .const import (
     ALIGN_CENTER,
+    DEFAULT_FLUID_DELAY,
+    DEFAULT_FLUID_DURATION,
     DEFAULT_FONT,
     DEFAULT_QUIET_END,
     DEFAULT_QUIET_START,
@@ -31,6 +33,8 @@ from .const import (
     DISPLAY_MODE_OFF,
     DISPLAY_MODE_ROTATION,
     DOMAIN,
+    FLUID_POUR,
+    MAX_FLUID_FRAMES,
     MODE_COMPOSE,
     MODE_DEVICE,
     PRIORITY_BACKGROUND,
@@ -42,7 +46,9 @@ from .const import (
     SOURCE_ROTATION,
     STATE_STORAGE_KEY,
     STATE_STORAGE_VERSION,
+    VALIGN_MIDDLE,
 )
+from .fluid import fluid_frames
 from .fonts import FontRegistry
 from .framebuffer import Framebuffer
 from .pages import Page, load_pages_sync
@@ -73,6 +79,7 @@ class Settings:
     set_delay_us: int = 1600
     differential: bool = False
     last_text: str = ""
+    fluid_simulation: str = FLUID_POUR
 
 
 @dataclass
@@ -592,14 +599,50 @@ class FluepdotController:
             finally:
                 self.notify_listeners()
 
-        self._animation = self.hass.async_create_task(runner())
+        task = self.hass.async_create_task(runner())
+        self._animation = task
         try:
-            await self._animation
+            await task
         except asyncio.CancelledError:
             pass
         finally:
-            self._animation = None
-            await self.async_refresh_display(force=True)
+            # Wurde die Animation von einer neuen abgeloest, gehoert die
+            # Anzeige jetzt der - dann weder aufraeumen noch zurueckschalten.
+            if self._animation is task:
+                self._animation = None
+                await self.async_refresh_display(force=True)
+
+    async def async_play_fluid(
+        self,
+        simulation: str | None = None,
+        duration: float = DEFAULT_FLUID_DURATION,
+        delay: float = DEFAULT_FLUID_DELAY,
+        text: str | None = None,
+        seed: int | None = None,
+        priority: str = PRIORITY_NORMAL,
+    ) -> None:
+        """Eine Fluessigkeits-Simulation rechnen und abspielen."""
+        count = min(MAX_FLUID_FRAMES, max(2, round(duration / delay)))
+        overlay = None
+        if text:
+            overlay = Framebuffer(self.width, self.height)
+            overlay.draw_lines(
+                self.fonts.get(self.settings.default_font),
+                [text],
+                align=ALIGN_CENTER,
+                valign=VALIGN_MIDDLE,
+            )
+        # Das Rechnen dauert einige hundert Millisekunden - nicht im Event-Loop.
+        name, frames = await self.hass.async_add_executor_job(
+            fluid_frames,
+            simulation or self.settings.fluid_simulation,
+            self.width,
+            self.height,
+            count,
+            seed,
+            overlay,
+        )
+        await self.async_animate(frames, delay, f"Wasser: {name}", priority)
 
     # -- Vom Koordinator ---------------------------------------------------
     @callback

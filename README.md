@@ -17,7 +17,7 @@
 `fluepdot` hangs a real, mechanical [flip-dot display](https://github.com/Fluepke/fluepdot) — the
 kind of clattering dot-matrix panel that used to sit above bus doors — directly off Home
 Assistant. Not "one switch that sends a string": a device, entities, live preview, a priority
-queue, quiet hours, and fourteen actions to draw text, bars, icons, marquees, destination signs
+queue, quiet hours, and fifteen actions to draw text, bars, icons, marquees, destination signs, water
 and raw frames on it.
 
 <div align="center">
@@ -73,13 +73,14 @@ framebuffer, which also tells it the display's actual size — nothing to config
 
 ## What you get
 
-One device, 24 entities:
+One device, 26 entities:
 
 | Entity | What it does |
 |---|---|
 | `image.flipdot_preview` | Live PNG snapshot of whatever is currently on the board |
 | `text.flipdot_message` | Free-text field — whatever you type gets shown |
 | `select.flipdot_mode` | `rotation` · `date` · `manual` · `off` |
+| `select.flipdot_fluid_simulation` / `button.flipdot_play_fluid_simulation` | Pick a water simulation — picking one plays it right away; the button plays it again |
 | `select.flipdot_font` / `select.flipdot_alignment` | Default font and text alignment |
 | `switch.flipdot_display` | Display on/off (off = blank, and stops writing anything) |
 | `switch.flipdot_quiet_hours` | Enable/disable the quiet-hours gate |
@@ -96,7 +97,7 @@ One device, 24 entities:
 
 `fluepdot.send_text` · `send_lines` · `marquee` · `destination_sign` · `draw` · `draw_bar` ·
 `set_pixel` · `clear_pixel` · `clear` · `effect` (wipe / dissolve / matrix / blink / snow /
-invert) · `show_page` · `reload_pages` · `extract_fonts` · `set_rendering_timings` — all with UI
+invert) · `fluid` · `show_page` · `reload_pages` · `extract_fonts` · `set_rendering_timings` — all with UI
 selectors, so they're usable straight from the Developer Tools → Actions tab without writing YAML.
 
 Two render paths, picked automatically or explicitly via `mode`:
@@ -136,6 +137,47 @@ the way a real vehicle does it.
 `scripts/preview_sign.py` renders the same layouts without Home Assistant and prints them as
 ASCII you can paste straight into `fluepdot.draw`, which is handy for checking a change against
 the real board before deploying it.
+
+### Fluid simulations
+
+`fluepdot.fluid` (or the `select.flipdot_fluid_simulation` dropdown) pours water across the
+board. Each simulation is a small story that ends with an empty board again:
+
+<div align="center">
+  <img src="docs/fluid.gif" alt="Dam break simulation on a 115x16 flip-dot board" width="575">
+</div>
+
+| Simulation | What happens |
+|---|---|
+| `pour` | Someone tips a jug in — a wobbly stream, splashes, the level rises, then the floor opens |
+| `wave` | Waves roll in, steepen into breakers, slam into the walls and throw spray |
+| `rain` | Rain falls into a puddle: a few drops, a shower, then it eases off |
+| `dam_break` | A column of water behind a dam — the dam goes, a tongue of water shoots across and bounces back |
+| `slosh` | A glass of water tipped back and forth until it sloshes over the rim |
+| `drain` | A full tub, someone pulls the plug — a funnel forms around the drain |
+| `fountain` | A pulsing fountain in a basin; the water goes round in circles |
+| `ripple` | Top view of a pond: drops fall in and the rings overlap |
+| `surprise` | One of the above, picked at random |
+
+```yaml
+action: fluepdot.fluid
+data:
+  simulation: dam_break
+  duration: 30   # the whole story always plays; shorter = faster
+  delay: 0.2     # seconds per frame
+  text: HALLO    # optional
+```
+
+`text` stays readable inside the water (inverted) and is left standing at the end; with `drain`
+the letters are solid, so water gets caught in them. `seed` makes a run repeatable. The water is
+real physics, just coarse: the waves are the 1D shallow-water equations (which is why they
+steepen into breakers on their own), the drops are ballistic, and `drain` is a cellular
+automaton. Everything is computed in Python up front, in the executor, in well under a second.
+
+Flip dots are mechanical, so a frame every 0.2 s is about as fast as it gets; turning on
+`switch.flipdot_differential_rendering` makes the animation noticeably smoother because only
+the dots that change are flipped. `scripts/preview_fluid.py` plays all simulations as ASCII in
+the terminal and can write animated GIFs (`--gif out/`) — no Home Assistant required.
 
 ### Rotation pages: `fluepdot_pages.yaml`
 

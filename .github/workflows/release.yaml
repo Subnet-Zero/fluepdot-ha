@@ -1,0 +1,40 @@
+name: Release
+
+# Ein Tag wie v1.2.0 veroeffentlicht die Version als GitHub-Release - daran
+# erkennt HACS das Update. Titel und Text kommen aus
+# .github/release-notes/<tag>.md (erste Zeile = Titel).
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Tag gegen manifest.json pruefen
+        run: |
+          version=$(jq -r .version custom_components/fluepdot/manifest.json)
+          if [ "v${version}" != "${GITHUB_REF_NAME}" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} passt nicht zu manifest.json (${version})"
+            exit 1
+          fi
+
+      - name: Release anlegen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          notes=".github/release-notes/${GITHUB_REF_NAME}.md"
+          if [ -f "$notes" ]; then
+            title=$(head -n 1 "$notes" | sed 's/^# *//')
+            tail -n +2 "$notes" > body.md
+            gh release create "$GITHUB_REF_NAME" --title "$title" --notes-file body.md --latest
+          else
+            gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes --latest
+          fi

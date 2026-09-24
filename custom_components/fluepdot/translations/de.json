@@ -85,6 +85,20 @@
           "center": "Zentriert",
           "right": "Rechts"
         }
+      },
+      "fluid": {
+        "name": "Wasser-Simulation",
+        "state": {
+          "pour": "Wasser eingießen",
+          "wave": "Wellen",
+          "rain": "Regen in die Pfütze",
+          "dam_break": "Dammbruch",
+          "slosh": "Schwappendes Glas",
+          "drain": "Stöpsel ziehen",
+          "fountain": "Springbrunnen",
+          "ripple": "Tropfen im Teich",
+          "surprise": "Überrasch mich"
+        }
       }
     },
     "number": {
@@ -123,6 +137,9 @@
       },
       "exercise": {
         "name": "Punkte-Training"
+      },
+      "fluid": {
+        "name": "Wasser abspielen"
       }
     },
     "image": {
@@ -473,6 +490,40 @@
         }
       }
     },
+    "fluid": {
+      "name": "Flüssigkeits-Simulation",
+      "description": "Lässt Wasser über die Anzeige laufen, schwappen oder regnen. Jede Simulation endet mit leerer Tafel (oder nur dem Text).",
+      "fields": {
+        "device_id": {
+          "name": "Anzeige",
+          "description": "Welche Flipdot-Anzeige gemeint ist. Ohne Angabe gelten alle."
+        },
+        "simulation": {
+          "name": "Simulation",
+          "description": "Welche Simulation. Ohne Angabe die im Auswahlfeld eingestellte."
+        },
+        "duration": {
+          "name": "Dauer",
+          "description": "Gesamtlänge der Animation. Es läuft immer die ganze Geschichte ab; kürzer heißt schneller."
+        },
+        "delay": {
+          "name": "Verzögerung",
+          "description": "Zeit zwischen zwei Bildern. Flipdots sind Mechanik - unter etwa 0,15 s kommt die Tafel womöglich nicht mehr mit."
+        },
+        "text": {
+          "name": "Text",
+          "description": "Optionaler Schriftzug. Er bleibt im Wasser (invertiert) lesbar und steht am Ende allein da; beim Stöpselziehen bleibt Wasser in den Buchstaben hängen."
+        },
+        "seed": {
+          "name": "Startwert",
+          "description": "Legt den Zufall fest - derselbe Startwert spielt genau dieselbe Animation."
+        },
+        "priority": {
+          "name": "Priorität",
+          "description": "Höhere Priorität verdrängt eine laufende Nachricht."
+        }
+      }
+    },
     "show_page": {
       "name": "Seite anzeigen",
       "description": "Zeigt eine in fluepdot_pages.yaml definierte Seite sofort.",
@@ -543,6 +594,21 @@
           "name": "Setzzeit",
           "description": "Zeit zum Hellschalten."
         }
+      }
+    }
+  },
+  "selector": {
+    "fluid": {
+      "options": {
+        "pour": "Wasser eingießen",
+        "wave": "Wellen",
+        "rain": "Regen in die Pfütze",
+        "dam_break": "Dammbruch",
+        "slosh": "Schwappendes Glas",
+        "drain": "Stöpsel ziehen",
+        "fountain": "Springbrunnen",
+        "ripple": "Tropfen im Teich",
+        "surprise": "Überrasch mich"
       }
     }
   }

@@ -24,6 +24,7 @@ async def async_setup_entry(
             FluepdotTestButton(controller),
             FluepdotInvertButton(controller),
             FluepdotExerciseButton(controller),
+            FluepdotFluidButton(controller),
         ]
     )
 
@@ -57,6 +58,19 @@ class FluepdotDateButton(FluepdotEntity, ButtonEntity):
             source=SOURCE_BUTTON,
             page_id="datum",
         )
+
+
+class FluepdotFluidButton(FluepdotEntity, ButtonEntity):
+    """Die gewaehlte Fluessigkeits-Simulation (noch einmal) abspielen."""
+
+    _attr_translation_key = "fluid"
+    _attr_icon = "mdi:water"
+
+    def __init__(self, controller) -> None:
+        super().__init__(controller, "fluid")
+
+    async def async_press(self) -> None:
+        self.hass.async_create_task(self.controller.async_play_fluid())
 
 
 class FluepdotTestButton(FluepdotEntity, ButtonEntity):

@@ -85,6 +85,20 @@
           "center": "Center",
           "right": "Right"
         }
+      },
+      "fluid": {
+        "name": "Fluid simulation",
+        "state": {
+          "pour": "Pouring water",
+          "wave": "Waves",
+          "rain": "Rain into a puddle",
+          "dam_break": "Dam break",
+          "slosh": "Sloshing glass",
+          "drain": "Pulling the plug",
+          "fountain": "Fountain",
+          "ripple": "Ripples on a pond",
+          "surprise": "Surprise me"
+        }
       }
     },
     "number": {
@@ -123,6 +137,9 @@
       },
       "exercise": {
         "name": "Exercise pixels"
+      },
+      "fluid": {
+        "name": "Play fluid simulation"
       }
     },
     "image": {
@@ -473,6 +490,40 @@
         }
       }
     },
+    "fluid": {
+      "name": "Fluid simulation",
+      "description": "Pours, sloshes or rains water across the display. Every simulation ends with an empty board (or just the text).",
+      "fields": {
+        "device_id": {
+          "name": "Display",
+          "description": "Which Flipdot display to target. Applies to all if omitted."
+        },
+        "simulation": {
+          "name": "Simulation",
+          "description": "Which simulation. Defaults to the one selected in the fluid simulation dropdown."
+        },
+        "duration": {
+          "name": "Duration",
+          "description": "Total length of the animation. The whole story always plays; a shorter duration plays it faster."
+        },
+        "delay": {
+          "name": "Delay",
+          "description": "Time between frames. Flip dots are mechanical - below about 0.15 s the board may not keep up."
+        },
+        "text": {
+          "name": "Text",
+          "description": "Optional text. It stays readable (inverted) inside the water and remains at the end; when pulling the plug, water gets caught in the letters."
+        },
+        "seed": {
+          "name": "Seed",
+          "description": "Fixes the randomness, so the same seed plays exactly the same animation."
+        },
+        "priority": {
+          "name": "Priority",
+          "description": "Higher priority replaces a running message."
+        }
+      }
+    },
     "show_page": {
       "name": "Show page",
       "description": "Immediately shows a page defined in fluepdot_pages.yaml.",
@@ -543,6 +594,21 @@
           "name": "Set delay",
           "description": "Time to set a dot."
         }
+      }
+    }
+  },
+  "selector": {
+    "fluid": {
+      "options": {
+        "pour": "Pouring water",
+        "wave": "Waves",
+        "rain": "Rain into a puddle",
+        "dam_break": "Dam break",
+        "slosh": "Sloshing glass",
+        "drain": "Pulling the plug",
+        "fountain": "Fountain",
+        "ripple": "Ripples on a pond",
+        "surprise": "Surprise me"
       }
     }
   }

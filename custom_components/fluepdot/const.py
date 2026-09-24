@@ -100,8 +100,34 @@ SERVICE_RELOAD_PAGES: Final = "reload_pages"
 SERVICE_EXTRACT_FONTS: Final = "extract_fonts"
 SERVICE_SET_TIMINGS: Final = "set_rendering_timings"
 SERVICE_DESTINATION_SIGN: Final = "destination_sign"
+SERVICE_FLUID: Final = "fluid"
 
 EFFECTS: Final = ["wipe", "dissolve", "matrix", "blink", "snow", "invert"]
+
+# --- Fluessigkeits-Simulationen (fluepdot.fluid, select.flipdot_fluid) -----
+FLUID_POUR: Final = "pour"
+FLUID_WAVE: Final = "wave"
+FLUID_RAIN: Final = "rain"
+FLUID_DAM_BREAK: Final = "dam_break"
+FLUID_SLOSH: Final = "slosh"
+FLUID_DRAIN: Final = "drain"
+FLUID_FOUNTAIN: Final = "fountain"
+FLUID_RIPPLE: Final = "ripple"
+FLUID_SURPRISE: Final = "surprise"
+FLUID_SIMULATIONS: Final = [
+    FLUID_POUR,
+    FLUID_WAVE,
+    FLUID_RAIN,
+    FLUID_DAM_BREAK,
+    FLUID_SLOSH,
+    FLUID_DRAIN,
+    FLUID_FOUNTAIN,
+    FLUID_RIPPLE,
+    FLUID_SURPRISE,
+]
+DEFAULT_FLUID_DURATION: Final = 30
+DEFAULT_FLUID_DELAY: Final = 0.2
+MAX_FLUID_FRAMES: Final = 600
 
 # --- Dateien ---------------------------------------------------------------
 PAGES_FILE: Final = "fluepdot_pages.yaml"

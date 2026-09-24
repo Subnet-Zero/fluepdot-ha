@@ -7,7 +7,7 @@ from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import ALIGNMENTS, DISPLAY_MODES
+from .const import ALIGNMENTS, DISPLAY_MODES, FLUID_SIMULATIONS
 from .entity import FluepdotEntity
 
 
@@ -20,6 +20,7 @@ async def async_setup_entry(
             FluepdotModeSelect(controller),
             FluepdotFontSelect(controller),
             FluepdotAlignSelect(controller),
+            FluepdotFluidSelect(controller),
         ]
     )
 
@@ -86,3 +87,23 @@ class FluepdotAlignSelect(FluepdotEntity, SelectEntity):
 
     async def async_select_option(self, option: str) -> None:
         await self.controller.async_update_settings(align=option)
+
+
+class FluepdotFluidSelect(FluepdotEntity, SelectEntity):
+    """Fluessigkeits-Simulation - eine Auswahl spielt sie sofort ab."""
+
+    _attr_translation_key = "fluid"
+    _attr_icon = "mdi:waves"
+    _attr_options = FLUID_SIMULATIONS
+
+    def __init__(self, controller) -> None:
+        super().__init__(controller, "fluid")
+
+    @property
+    def current_option(self) -> str:
+        return self.controller.settings.fluid_simulation
+
+    async def async_select_option(self, option: str) -> None:
+        await self.controller.async_update_settings(fluid_simulation=option)
+        # Nicht auf das Ende der Animation warten, sonst haengt die Auswahl.
+        self.hass.async_create_task(self.controller.async_play_fluid(option))

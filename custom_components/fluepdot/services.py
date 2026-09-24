@@ -17,9 +17,12 @@ from .const import (
     ALIGN_LEFT,
     BOX_OUTLINE,
     BOX_STYLES,
+    DEFAULT_FLUID_DELAY,
+    DEFAULT_FLUID_DURATION,
     DEFAULT_VIA_PREFIX,
     DOMAIN,
     EFFECTS,
+    FLUID_SIMULATIONS,
     MODE_COMPOSE,
     MODE_DEVICE,
     PRIORITIES,
@@ -32,6 +35,7 @@ from .const import (
     SERVICE_DRAW_BAR,
     SERVICE_EFFECT,
     SERVICE_EXTRACT_FONTS,
+    SERVICE_FLUID,
     SERVICE_MARQUEE,
     SERVICE_RELOAD_PAGES,
     SERVICE_SEND_LINES,
@@ -161,6 +165,22 @@ EFFECT_SCHEMA = vol.Schema(
         vol.Optional("delay", default=0.25): vol.All(
             vol.Coerce(float), vol.Range(0.1, 5)
         ),
+        vol.Optional("priority", default=PRIORITY_NORMAL): vol.In(PRIORITIES),
+    }
+)
+
+FLUID_SCHEMA = vol.Schema(
+    {
+        **TARGET_SCHEMA,
+        vol.Optional("simulation"): vol.In(FLUID_SIMULATIONS),
+        vol.Optional("duration", default=DEFAULT_FLUID_DURATION): vol.All(
+            vol.Coerce(float), vol.Range(2, 120)
+        ),
+        vol.Optional("delay", default=DEFAULT_FLUID_DELAY): vol.All(
+            vol.Coerce(float), vol.Range(0.1, 5)
+        ),
+        vol.Optional("text"): cv.string,
+        vol.Optional("seed"): vol.Coerce(int),
         vol.Optional("priority", default=PRIORITY_NORMAL): vol.In(PRIORITIES),
     }
 )
@@ -480,6 +500,18 @@ async def _handle_effect(hass: HomeAssistant, call: ServiceCall) -> None:
         )
 
 
+async def _handle_fluid(hass: HomeAssistant, call: ServiceCall) -> None:
+    for controller in _controllers(hass, call):
+        await controller.async_play_fluid(
+            call.data.get("simulation"),
+            call.data.get("duration", DEFAULT_FLUID_DURATION),
+            call.data.get("delay", DEFAULT_FLUID_DELAY),
+            call.data.get("text"),
+            call.data.get("seed"),
+            call.data.get("priority", PRIORITY_NORMAL),
+        )
+
+
 async def _handle_show_page(hass: HomeAssistant, call: ServiceCall) -> None:
     for controller in _controllers(hass, call):
         page = controller.page_by_id(call.data["page_id"])
@@ -546,6 +578,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         (SERVICE_CLEAR_PIXEL, _handle_clear_pixel, PIXEL_SCHEMA),
         (SERVICE_CLEAR, _handle_clear, SIMPLE_SCHEMA),
         (SERVICE_EFFECT, _handle_effect, EFFECT_SCHEMA),
+        (SERVICE_FLUID, _handle_fluid, FLUID_SCHEMA),
         (SERVICE_SHOW_PAGE, _handle_show_page, SHOW_PAGE_SCHEMA),
         (SERVICE_RELOAD_PAGES, _handle_reload_pages, SIMPLE_SCHEMA),
         (SERVICE_EXTRACT_FONTS, _handle_extract_fonts, EXTRACT_SCHEMA),
@@ -576,6 +609,7 @@ def async_unregister_services(hass: HomeAssistant) -> None:
         SERVICE_CLEAR_PIXEL,
         SERVICE_CLEAR,
         SERVICE_EFFECT,
+        SERVICE_FLUID,
         SERVICE_SHOW_PAGE,
         SERVICE_RELOAD_PAGES,
         SERVICE_EXTRACT_FONTS,

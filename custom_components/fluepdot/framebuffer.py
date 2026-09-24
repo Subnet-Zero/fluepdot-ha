@@ -218,6 +218,14 @@ class Framebuffer:
         )
 
     @classmethod
+    def from_rows(cls, rows: list[bytearray]) -> Framebuffer:
+        """Direkt aus Zeilen mit 0/1 bauen (schnell, fuer Animationen)."""
+        buffer = cls(len(rows[0]) if rows else DEFAULT_WIDTH, len(rows) or DEFAULT_HEIGHT)
+        if rows:
+            buffer._rows = rows
+        return buffer
+
+    @classmethod
     def from_ascii(
         cls,
         data: str,

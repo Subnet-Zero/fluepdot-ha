@@ -146,6 +146,9 @@ class FluepdotController:
         self._started = False
         self._quiet_state = False
         self._tick_unsub = None
+        # Zuletzt geschriebener Hintergrund-Inhalt samt Framebuffer, damit
+        # nach einem Neustart erkannt wird, dass er noch auf der Anzeige steht.
+        self._last_content: dict | None = None
 
     # -- Lebenszyklus ------------------------------------------------------
     async def async_start(self) -> None:
@@ -155,7 +158,11 @@ class FluepdotController:
             self.settings = Settings(
                 **{key: value for key, value in stored.items() if key in known}
             )
+            last = stored.get("last_content")
+            if isinstance(last, dict):
+                self._last_content = last
         await self.async_reload_pages()
+        await self._restore_current()
         try:
             fonts = await self.client.get_fonts()
             self.device_fonts = [short for _full, short in fonts]
@@ -177,8 +184,75 @@ class FluepdotController:
         self._cancel_expiry()
         self._cancel_animation()
 
+    def _state_data(self) -> dict:
+        data = asdict(self.settings)
+        if self._last_content is not None:
+            data["last_content"] = self._last_content
+        return data
+
     async def _save_settings(self) -> None:
-        await self._store.async_save(asdict(self.settings))
+        await self._store.async_save(self._state_data())
+
+    async def _restore_current(self) -> None:
+        """Nach einem Neustart uebernehmen, was noch auf der Anzeige steht.
+
+        Steht auf dem Geraet noch genau das Bild, das wir zuletzt geschrieben
+        haben, wird der zugehoerige Inhalt als aktuell uebernommen. Der erste
+        Render nach dem Start erkennt ihn dann als unveraendert und laesst die
+        Anzeige in Ruhe, statt sie zu leeren und neu zu beschreiben.
+        """
+        try:
+            raw = await self.client.get_framebuffer()
+        except FluepdotError as err:
+            _LOGGER.debug("Framebuffer beim Start nicht lesbar: %s", err)
+            return
+        device = Framebuffer.from_ascii(raw, self.width, self.height)
+        self.last_framebuffer = device
+        self._expected = device.to_ascii()
+
+        last = self._last_content
+        if not last or not isinstance(last.get("framebuffer"), str):
+            return
+        stored = Framebuffer.from_ascii(last["framebuffer"], self.width, self.height)
+        if stored != device:
+            return
+        self.current = CurrentContent(
+            description=last.get("description", "unbekannt"),
+            source=last.get("source", SOURCE_ROTATION),
+            priority=PRIORITY_BACKGROUND,
+            page_id=last.get("page_id"),
+            written_at=(
+                dt_util.parse_datetime(last["written_at"])
+                if last.get("written_at")
+                else None
+            ),
+        )
+        # Die Rotation bei der angezeigten Seite fortsetzen, nicht vorne.
+        for index, page in enumerate(self.visible_pages):
+            if page.page_id == self.current.page_id:
+                self._rotation_index = index
+                break
+        _LOGGER.debug("Anzeige unveraendert seit dem Neustart: %s", self.current.description)
+
+    def _remember_content(self) -> None:
+        """Hintergrund-Inhalt fuer den naechsten Start merken (verzoegert)."""
+        if self.current.priority != PRIORITY_BACKGROUND or self._expected is None:
+            self._last_content = None
+        else:
+            self._last_content = {
+                "description": self.current.description,
+                "source": self.current.source,
+                "page_id": self.current.page_id,
+                "written_at": (
+                    self.current.written_at.isoformat()
+                    if self.current.written_at
+                    else None
+                ),
+                "framebuffer": self._expected,
+            }
+        # Verzoegert speichern: die Rotation schreibt oft, HA sichert
+        # ausstehende Daten beim Herunterfahren ohnehin noch weg.
+        self._store.async_delay_save(self._state_data, 10)
 
     @callback
     def notify_listeners(self) -> None:
@@ -306,6 +380,7 @@ class FluepdotController:
         else:
             self._cancel_rotation()
 
+        self._remember_content()
         self.notify_listeners()
         return True
 
@@ -395,12 +470,20 @@ class FluepdotController:
             self._cancel_expiry()
             if self.quiet_now:
                 return
+            # Steht schon nichts drauf (z. B. nach einem Neustart bei
+            # ausgeschalteter Anzeige), nicht erneut leeren.
+            already_blank = (
+                self._expected is not None
+                and self.last_framebuffer.is_empty()
+                and not self.foreign_content
+            )
             async with self._write_lock:
                 try:
-                    await self.client.clear(self.width, self.height)
+                    if not already_blank:
+                        await self.client.clear(self.width, self.height)
+                        self.diagnostics.writes += 1
                     self.last_framebuffer = Framebuffer(self.width, self.height)
                     self._expected = self.last_framebuffer.to_ascii()
-                    self.diagnostics.writes += 1
                     self.available = True
                 except FluepdotError as err:
                     self._record_error(err)
